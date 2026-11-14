@@ -1,0 +1,332 @@
+# Metadane domów REFIT przepisane z data/raw/REFIT_Readme.txt.
+# Plik opisuje tylko fakty z README; decyzje (co wykluczyć, czego używać) podejmuje pipeline.
+#
+# Każdy kanał (Appliance1..9):
+#   label     - oryginalna nazwa z README
+#   appliance - typ kanoniczny NA POCZĄTKU nagrań (lista w metadata.py); null = nieużywany / nieznany
+#   mixed     - kanał mierzy kilka urządzeń naraz (np. "Television Site", dwa urządzenia na jednym IAM)
+#   note      - dodatkowa informacja z README
+#   events    - zmiany w czasie:
+#       appliance_changed - na kanale jest od tej daty inny typ urządzenia (pole appliance = nowy typ)
+#       device_replaced   - wymiana na inny egzemplarz tego samego typu
+#       device_added      - od tej daty na kanale jest dodatkowe urządzenie
+#       signature_change  - zmiana charakterystyki poboru bez podanej przyczyny
+#     date: null = data nieznana; approx: true = data przybliżona
+#
+# Daty w README są w formacie DD/MM/YYYY, tutaj YYYY-MM-DD.
+
+House_1:
+  notes: ["Październik 2014: wiele żarówek wymienionych na LED (wpływa na Aggregate)"]
+  channels:
+    Appliance1: {label: Fridge, appliance: fridge}
+    Appliance2: {label: Chest Freezer, appliance: freezer}
+    Appliance3: {label: Upright Freezer, appliance: freezer}
+    Appliance4: {label: Tumble Dryer, appliance: tumble_dryer}
+    Appliance5: {label: Washing Machine, appliance: washing_machine}
+    Appliance6: {label: Dishwasher, appliance: dishwasher}
+    Appliance7: {label: Computer Site, appliance: computer, mixed: true, note: "Desktop Computer, Computer Monitor"}
+    Appliance8: {label: Television Site, appliance: television, mixed: true}
+    Appliance9: {label: Electric Heater, appliance: electric_heater}
+
+House_2:
+  channels:
+    Appliance1: {label: Fridge-Freezer, appliance: fridge_freezer}
+    Appliance2: {label: Washing Machine, appliance: washing_machine}
+    Appliance3: {label: Dishwasher, appliance: dishwasher}
+    Appliance4: {label: Television, appliance: television}
+    Appliance5: {label: Microwave, appliance: microwave}
+    Appliance6: {label: Toaster, appliance: toaster}
+    Appliance7: {label: Hi-Fi, appliance: hifi}
+    Appliance8: {label: Kettle, appliance: kettle}
+    Appliance9: {label: Oven Extractor Fan, appliance: extractor_fan}
+
+House_3:
+  channels:
+    Appliance1: {label: Toaster, appliance: toaster}
+    Appliance2: {label: Fridge-Freezer, appliance: fridge_freezer}
+    Appliance3: {label: Freezer, appliance: freezer}
+    Appliance4: {label: Tumble Dryer, appliance: tumble_dryer}
+    Appliance5: {label: Dishwasher, appliance: dishwasher}
+    Appliance6: {label: Washing Machine, appliance: washing_machine}
+    Appliance7: {label: Television, appliance: television}
+    Appliance8: {label: Microwave, appliance: microwave}
+    Appliance9: {label: Kettle, appliance: kettle}
+
+House_4:
+  channels:
+    Appliance1: {label: Fridge, appliance: fridge}
+    Appliance2: {label: Freezer, appliance: freezer}
+    Appliance3: {label: Fridge-Freezer, appliance: fridge_freezer}
+    Appliance4: {label: Washing Machine (1), appliance: washing_machine}
+    Appliance5: {label: Washing Machine (2), appliance: washing_machine}
+    Appliance6:
+      label: Computer Site
+      appliance: computer
+      mixed: true
+      note: "Desktop Computer, Computer Monitor, Scanner, Printer, Router"
+      events:
+        - {kind: signature_change, date: 2015-02-01}
+    Appliance7:
+      label: Television Site
+      appliance: television
+      mixed: true
+      note: "Television, DVD Player, VHS Player"
+      events:
+        - {kind: signature_change, date: 2014-12-19}
+    Appliance8: {label: Microwave, appliance: microwave}
+    Appliance9: {label: Kettle, appliance: kettle}
+
+House_5:
+  channels:
+    Appliance1: {label: Fridge-Freezer, appliance: fridge_freezer}
+    Appliance2:
+      label: Tumble Dryer
+      appliance: tumble_dryer
+      events:
+        - {kind: device_added, date: 2014-11-21, note: "Dehumidifier"}
+    Appliance3: {label: Washing Machine, appliance: washing_machine}
+    Appliance4: {label: Dishwasher, appliance: dishwasher}
+    Appliance5:
+      label: Computer Site
+      appliance: computer
+      mixed: true
+      note: "Desktop Computer, Computer Monitor, Printer, Speakers"
+      events:
+        - {kind: signature_change, date: 2015-01-27}
+    Appliance6: {label: Television Site, appliance: television, mixed: true, note: "Television w/DVD Player, Set-top Box, Games Console"}
+    Appliance7: {label: Combination Microwave, appliance: microwave, note: "Mikrofalówka kombinowana (z funkcją piekarnika)"}
+    Appliance8: {label: Kettle, appliance: kettle}
+    Appliance9: {label: Toaster, appliance: toaster}
+
+House_6:
+  channels:
+    Appliance1: {label: Freezer (Utility Room), appliance: freezer}
+    Appliance2: {label: Washing Machine, appliance: washing_machine}
+    Appliance3: {label: Dishwasher, appliance: dishwasher}
+    Appliance4: {label: MJY Computer, appliance: computer, mixed: true, note: "Desktop Computer, 2x Computer Monitor, Printer"}
+    Appliance5: {label: Television Site, appliance: television, mixed: true, note: "Television, Set-top Box, PC, DVD Player"}
+    Appliance6: {label: Microwave, appliance: microwave}
+    Appliance7: {label: Kettle, appliance: kettle}
+    Appliance8: {label: Toaster, appliance: toaster}
+    Appliance9: {label: PGM Computer, appliance: computer, mixed: true, note: "Desktop Computer, Computer Monitor, Printer, Shredder"}
+
+House_7:
+  channels:
+    Appliance1: {label: Fridge, appliance: fridge}
+    Appliance2: {label: Freezer (Garage), appliance: freezer}
+    Appliance3:
+      label: Freezer
+      appliance: freezer
+      events:
+        - {kind: signature_change, date: 2013-11-24}
+    Appliance4: {label: Tumble Dryer, appliance: tumble_dryer}
+    Appliance5: {label: Washing Machine, appliance: washing_machine}
+    Appliance6:
+      label: Dishwasher
+      appliance: dishwasher
+      events:
+        - {kind: signature_change, date: 2014-05-20}
+    Appliance7: {label: Television Site, appliance: television, mixed: true, note: "Television, Speakers, Telephone"}
+    Appliance8: {label: Toaster, appliance: toaster}
+    Appliance9: {label: Kettle, appliance: kettle}
+
+House_8:
+  channels:
+    Appliance1:
+      label: Fridge
+      appliance: fridge
+      events:
+        - {kind: device_replaced, date: null, note: "README: 'Change in Fridge Nov 6th' - bez roku (2013 lub 2014)"}
+    Appliance2: {label: Freezer, appliance: freezer}
+    Appliance3: {label: Dryer, appliance: tumble_dryer}
+    Appliance4: {label: Washing Machine, appliance: washing_machine}
+    Appliance5: {label: Toaster, appliance: toaster, mixed: true, note: "Toaster, DAB Radio"}
+    Appliance6: {label: Computer, appliance: computer}
+    Appliance7: {label: Television Site, appliance: television, mixed: true, note: "Television, DVD Player, VHS Player, Sound Bar"}
+    Appliance8: {label: Microwave, appliance: microwave}
+    Appliance9: {label: Kettle, appliance: kettle}
+
+House_9:
+  channels:
+    Appliance1: {label: Fridge-Freezer, appliance: fridge_freezer}
+    Appliance2: {label: Washer Dryer, appliance: washer_dryer}
+    Appliance3: {label: Washing Machine, appliance: washing_machine}
+    Appliance4: {label: Dishwasher, appliance: dishwasher}
+    Appliance5: {label: Television Site, appliance: television, mixed: true, note: "Television, Sky Box, DVD Player"}
+    Appliance6: {label: Microwave, appliance: microwave}
+    Appliance7: {label: Kettle, appliance: kettle}
+    Appliance8: {label: Hi-Fi, appliance: hifi}
+    Appliance9: {label: Electric Heater, appliance: electric_heater}
+
+House_10:
+  channels:
+    Appliance1:
+      label: Magimix (Blender)
+      appliance: fridge
+      note: "Label z README opisuje stan po zmianie"
+      events:
+        - {kind: appliance_changed, date: 2014-06-17, appliance: blender}
+    Appliance2:
+      label: Freezer
+      appliance: freezer
+      events:
+        - {kind: appliance_changed, date: 2014-06-25, appliance: toaster}
+    Appliance3:
+      label: Chest Freezer (In Garage)
+      appliance: freezer
+      events:
+        - {kind: device_added, date: 2015-04-01, approx: true, note: "README: 'Post April 2015' - drugi zamrażalnik w garażu"}
+    Appliance4:
+      label: Fridge-Freezer
+      appliance: fridge_freezer
+      events:
+        - {kind: device_replaced, date: 2015-03-01, approx: true, note: "Whirlpool ART 500-9/G/1 -> AEG SKZ71800F0, 'March 2015'"}
+    Appliance5: {label: Washing Machine, appliance: washing_machine}
+    Appliance6: {label: Dishwasher, appliance: dishwasher}
+    Appliance7:
+      label: Television Site
+      appliance: television
+      mixed: true
+      note: "TV, DVD Player, Set-top Box, Router, Network storage PSU, Laptop PSU"
+    Appliance8: {label: Microwave, appliance: microwave}
+    Appliance9: {label: Kenwood KMix, appliance: null, note: "Niejednoznaczne: KMix to linia produktów (czajnik, toster, mikser)"}
+
+House_11:
+  solar: true
+  notes: ["Aggregate zaburzony przez panele słoneczne"]
+  channels:
+    Appliance1: {label: Fridge, appliance: fridge}
+    Appliance2: {label: Fridge-Freezer, appliance: fridge_freezer}
+    Appliance3: {label: Washing Machine, appliance: washing_machine}
+    Appliance4:
+      label: Dishwasher
+      appliance: dishwasher
+      events:
+        - {kind: device_replaced, date: null, note: "README: 'Possible dishwasher replacement'"}
+    Appliance5: {label: Computer Site, appliance: computer, mixed: true}
+    Appliance6: {label: Microwave, appliance: microwave}
+    Appliance7: {label: Kettle, appliance: kettle}
+    Appliance8: {label: Router, appliance: router}
+    Appliance9: {label: Hi-Fi, appliance: hifi}
+
+House_12:
+  channels:
+    Appliance1: {label: Fridge-Freezer, appliance: fridge_freezer}
+    Appliance2: {label: Television Site (Lounge), appliance: television, mixed: true}
+    Appliance3: {label: Microwave, appliance: microwave}
+    Appliance4: {label: Kettle, appliance: kettle}
+    Appliance5: {label: Toaster, appliance: toaster}
+    Appliance6: {label: Television Site (Bedroom), appliance: television, mixed: true}
+    Appliance7: {label: Not Used, appliance: null}
+    Appliance8: {label: Not Used, appliance: null}
+    Appliance9: {label: Not Used, appliance: null}
+
+House_13:
+  channels:
+    Appliance1: {label: Television Site, appliance: television, mixed: true, note: "Television, Xbox, Wii"}
+    Appliance2: {label: Unknown, appliance: null, note: "Podłączone urządzenie nie zostało zapisane"}
+    Appliance3: {label: Washing Machine, appliance: washing_machine}
+    Appliance4: {label: Dishwasher, appliance: dishwasher}
+    Appliance5:
+      label: Tumble Dryer
+      appliance: tumble_dryer
+      events:
+        - {kind: signature_change, date: null, note: "Zmiany charakterystyki bez informacji o urządzeniach"}
+    Appliance6: {label: Television Site, appliance: television, mixed: true, note: "Television, Computer, Current Cost"}
+    Appliance7: {label: Computer Site, appliance: computer, mixed: true, note: "Laptop Dock, Camera System (July-Aug 2014)"}
+    Appliance8: {label: Microwave, appliance: microwave}
+    Appliance9: {label: Kettle, appliance: kettle}
+
+House_15:
+  channels:
+    Appliance1: {label: Fridge-Freezer, appliance: fridge_freezer}
+    Appliance2: {label: Tumble Dryer, appliance: tumble_dryer}
+    Appliance3: {label: Washing Machine, appliance: washing_machine}
+    Appliance4: {label: Dishwasher, appliance: dishwasher}
+    Appliance5: {label: Computer Site, appliance: computer, mixed: true, note: "Desktop Computer, Printer"}
+    Appliance6: {label: Television Site, appliance: television, mixed: true, note: "Television, Xbox, Set-top Box"}
+    Appliance7: {label: Microwave, appliance: microwave}
+    Appliance8: {label: Kettle, appliance: kettle}
+    Appliance9: {label: Toaster, appliance: toaster}
+
+House_16:
+  channels:
+    Appliance1: {label: Fridge-Freezer (1), appliance: fridge_freezer}
+    Appliance2: {label: Fridge-Freezer (2), appliance: fridge_freezer}
+    Appliance3: {label: "Electric Heater (1)?",appliance: electric_heater, note: "README podaje ze znakiem zapytania"}
+    Appliance4: {label: Electric Heater (2), appliance: electric_heater}
+    Appliance5: {label: Washing Machine, appliance: washing_machine}
+    Appliance6: {label: Dishwasher, appliance: dishwasher}
+    Appliance7: {label: Computer Site, appliance: computer, mixed: true}
+    Appliance8: {label: Television Site, appliance: television, mixed: true, note: "Television, DVD/Blu-ray Player, Wii, Speakers"}
+    Appliance9: {label: Dehumidifier/Heater, appliance: null, note: "Niejednoznaczne: osuszacz albo grzejnik"}
+
+House_17:
+  channels:
+    Appliance1:
+      label: Freezer (Garage)
+      appliance: freezer
+      events:
+        - {kind: device_replaced, date: 2015-05-19, approx: true, note: "README: wymieniony ~1 miesiąc przed końcem nagrań na mniejszy"}
+    Appliance2:
+      label: Fridge-Freezer
+      appliance: fridge_freezer
+      events:
+        - {kind: device_replaced, date: 2015-05-15, approx: true, note: "README: 'mid May 2015'"}
+    Appliance3: {label: Tumble Dryer (Garage), appliance: tumble_dryer}
+    Appliance4: {label: Washing Machine, appliance: washing_machine}
+    Appliance5: {label: Computer Site, appliance: computer, mixed: true, note: "Desktop, 2x Computer Monitor, Printer"}
+    Appliance6: {label: Television Site, appliance: television, mixed: true}
+    Appliance7: {label: Microwave, appliance: microwave}
+    Appliance8: {label: Kettle, appliance: kettle, mixed: true, note: "Kettle, Toaster & Misc (okazjonalnie podłączane)"}
+    Appliance9: {label: Plug Site (Bedroom), appliance: null, mixed: true, note: "Television, Laptop, Hair Dryer, Phone Charger"}
+
+House_18:
+  channels:
+    Appliance1: {label: Fridge (garage), appliance: fridge}
+    Appliance2: {label: Freezer (garage), appliance: freezer}
+    Appliance3: {label: Fridge-Freezer, appliance: fridge_freezer}
+    Appliance4: {label: Washer Dryer (garage), appliance: washer_dryer}
+    Appliance5: {label: Washing Machine, appliance: washing_machine}
+    Appliance6: {label: Dishwasher, appliance: dishwasher}
+    Appliance7: {label: Desktop Computer, appliance: computer}
+    Appliance8: {label: Television Site, appliance: television, mixed: true, note: "Television, DVD Player, Sky Box, Speakers, Lamp, HiFi"}
+    Appliance9: {label: Microwave, appliance: microwave}
+
+House_19:
+  channels:
+    Appliance1: {label: Fridge & Freezer, appliance: fridge_freezer, mixed: true, note: "Lodówka I zamrażarka na jednym IAM"}
+    Appliance2: {label: Washing Machine, appliance: washing_machine}
+    Appliance3: {label: Television Site, appliance: television, mixed: true, note: "Television, DVD Player"}
+    Appliance4: {label: Microwave, appliance: microwave}
+    Appliance5: {label: Kettle, appliance: kettle}
+    Appliance6: {label: Toaster, appliance: toaster}
+    Appliance7: {label: Bread-maker, appliance: bread_maker}
+    Appliance8: {label: Lamp (80Watts), appliance: lamp}
+    Appliance9: {label: Hi-Fi, appliance: hifi}
+
+House_20:
+  channels:
+    Appliance1: {label: Fridge, appliance: fridge}
+    Appliance2: {label: Freezer, appliance: freezer}
+    Appliance3: {label: Tumble Dryer, appliance: tumble_dryer}
+    Appliance4: {label: Washing Machine, appliance: washing_machine}
+    Appliance5: {label: Dishwasher, appliance: dishwasher}
+    Appliance6: {label: Computer Site, appliance: computer, mixed: true}
+    Appliance7: {label: Television Site, appliance: television, mixed: true}
+    Appliance8: {label: Microwave, appliance: microwave}
+    Appliance9: {label: Kettle, appliance: kettle}
+
+House_21:
+  solar: true
+  notes: ["Aggregate zaburzony przez panele słoneczne"]
+  channels:
+    Appliance1: {label: Fridge-Freezer, appliance: fridge_freezer}
+    Appliance2: {label: Tumble Dryer, appliance: tumble_dryer}
+    Appliance3: {label: Washing Machine, appliance: washing_machine}
+    Appliance4: {label: Dishwasher, appliance: dishwasher}
+    Appliance5: {label: Food Mixer, appliance: food_mixer}
+    Appliance6: {label: Television, appliance: television}
+    Appliance7: {label: Kettle/Toaster, appliance: kettle, mixed: true, note: "Czajnik i toster na jednym IAM"}
+    Appliance8: {label: Vivarium, appliance: vivarium}
+    Appliance9: {label: Pond Pump, appliance: pond_pump}

@@ -5,6 +5,7 @@ Jedyny punkt startu runów W&B w projekcie. Nie wywołujemy wandb.init bezpośre
 
 import os
 import subprocess
+from dataclasses import asdict
 from typing import cast, get_args
 
 import wandb
@@ -29,7 +30,13 @@ def _git_dirty() -> bool | None:
         return None
 
 
-def init_run(cfg: ExperimentConfig, job_type: str):
+def init_run(cfg: ExperimentConfig, job_type: str, data_hash: str | None = None):
+    """
+    Start runa W&B z pełnym configiem eksperymentu.
+
+    data_hash: katalog data/processed/<hash>/ zwrócony przez run_pipeline; wiąże run
+    z dokładną wersją przetworzonych danych.
+    """
     if job_type not in JOB_TYPES:
         raise ValueError(f"job_type musi być jednym z {JOB_TYPES}, podano '{job_type}'")
 
@@ -39,7 +46,7 @@ def init_run(cfg: ExperimentConfig, job_type: str):
 
     git_dirty = _git_dirty()
     if git_dirty:
-        print("[wandb] UWAGA: niezacommitowane zmiany — run może być trudny do odtworzenia.")
+        print("[wandb] UWAGA: niezacommitowane zmiany - run może być trudny do odtworzenia.")
 
     return wandb.init(
         entity=w.entity,
@@ -49,6 +56,6 @@ def init_run(cfg: ExperimentConfig, job_type: str):
         job_type=job_type,
         tags=w.tags,
         notes=w.notes,
-        config={**cfg.to_dict(), "git_dirty": git_dirty},
+        config={**asdict(cfg), "git_dirty": git_dirty, "data_hash": data_hash},
         mode=mode,
     )

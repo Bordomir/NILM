@@ -89,7 +89,7 @@ Wzór: **`zbiór/metryka/urządzenie`**
 
 - **zbiór**: `train`, `val` albo `test`
 - **metryka**: małymi literami, np. `loss`, `mae`, `f1`
-- **urządzenie**: nazwa jak w `mappings.py`, np. `kettle`, `fridge_freezer`
+- **urządzenie**: nazwa z listy `APPLIANCES` w `src/nilm/data/preprocessing/metadata.py`, np. `kettle`, `fridge_freezer`
 
 **Dlaczego?** Dla W&B `val/mae/kettle` i `kettle_mae` to dwie zupełnie różne rzeczy.
 Jeśli każdy nazwie metrykę inaczej, nie da się położyć wyników dwóch osób obok siebie.
@@ -151,12 +151,7 @@ Przy `init_run` podajesz, czym jest run:
 
 ## Typowy dzień pracy
 
-1. Kopiujesz `configs/base.yaml` do nowego pliku i zmieniasz ustawienia.
-2. Ustawiasz `debug: true` i puszczasz krótki trening, żeby sprawdzić, czy działa.
-3. Działa? Usuwasz `debug: true` i robisz commit.
-4. Puszczasz prawdziwy trening. Wynik trafia do `nilm`.
-5. Na stronie W&B porównujesz swój wynik z wynikami innych.
-6. Masz ciekawe wnioski? Opisz je w **Report** na W&B. To dokument z wykresami, który łatwo pokazać zespołowi albo promotorowi.
+Jak to wszystko połączyć w praktyce, od gałęzi w gicie po pull request, opisuje [workflow.md](workflow.md).
 
 ---
 
@@ -167,4 +162,4 @@ Przy `init_run` podajesz, czym jest run:
 | `wandb: ERROR ... not logged in` | `uv run wandb login` |
 | `permission denied` / brak dostępu do `DL_NILM` | nie jesteś jeszcze w zespole, poproś o zaproszenie |
 | Komputer bez internetu (np. klaster) | uruchom z `WANDB_MODE=offline`, a potem na komputerze z internetem `uv run wandb sync wandb/offline-run-*` |
-| `Nieznany klucz konfiguracji` | literówka w pliku `.yaml`; sprawdź nazwę w `src/nilm/config.py` |
+| `Nieznany klucz konfiguracji` | literówka w pliku `.yaml`; sprawdź nazwę w `src/nilm/config/` |
