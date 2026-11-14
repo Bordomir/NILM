@@ -1,2 +1,17 @@
-__pycache__
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Narzędzia
+.ruff_cache/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Dane i wyniki eksperymentów (nie commitujemy)
 data/*
+outputs/
+runs/
+wandb/
+*.ckpt
+*.pt
