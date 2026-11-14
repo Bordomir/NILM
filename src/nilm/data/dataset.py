@@ -11,9 +11,8 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
+from nilm.data.preprocessing.io import SEGMENT_COL
 from nilm.data.preprocessing.metadata import HouseMeta
-
-SEGMENT_COL = "segment"
 
 
 def appliance_target(df: pd.DataFrame, house: HouseMeta, appliance: str) -> pd.Series:

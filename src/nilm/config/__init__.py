@@ -13,7 +13,7 @@ from nilm.config.experiment import (
     WandbMode,
     load_config,
 )
-from nilm.config.preprocess import PreprocessConfig, load_preprocess_config
+from nilm.config.preprocess import PreprocessConfig
 
 __all__ = [
     "DataConfig",
@@ -24,5 +24,4 @@ __all__ = [
     "WandbConfig",
     "WandbMode",
     "load_config",
-    "load_preprocess_config",
 ]

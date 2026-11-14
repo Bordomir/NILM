@@ -2,6 +2,9 @@
 # Pominięte klucze biorą wartości domyślne z src/nilm/config/.
 name: baseline
 
+# Obróbka danych: zmiana tej sekcji = inne przetworzone dane (nowy hash w data/processed/)
+preprocess: {}
+
 data:
   window_size: 100
   appliances: [kettle, microwave, fridge_freezer]

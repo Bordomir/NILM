@@ -3,7 +3,9 @@ Moduł do pobrania zbioru REFIT i transformacji danych csv na Parquet.
 
 """
 
+import json
 from pathlib import Path
+from typing import Any
 
 import kagglehub
 import pandas as pd
@@ -12,6 +14,8 @@ KAGGLE_DATASET = "kyleahmurphy/uk-electrical-load"
 
 APPLIANCE_COLS = [f"Appliance{i}" for i in range(1, 10)]
 POWER_COLS = ["Aggregate", *APPLIANCE_COLS]
+# Numer ciągłego fragmentu danych (bez dziur); dodaje go etap podziału na segmenty
+SEGMENT_COL = "segment"
 
 
 def download_refit(output_dir: str | Path = "data/raw") -> Path:
@@ -46,6 +50,16 @@ def write_parquet(df: pd.DataFrame, path: str | Path) -> None:
     # niepełnego pliku, który cache pipeline'u uznałby za gotowy
     tmp_path = path.with_name(path.name + ".tmp")
     df.to_parquet(tmp_path, index=True)
+    tmp_path.replace(path)
+
+
+def write_json(data: Any, path: str | Path) -> None:
+    """Zapisuje dane do pliku JSON, tak jak write_parquet: przez plik tymczasowy."""
+
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = path.with_name(path.name + ".tmp")
+    tmp_path.write_text(json.dumps(data, indent=2, ensure_ascii=False))
     tmp_path.replace(path)
 
 

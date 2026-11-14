@@ -20,6 +20,12 @@ uv run python -c "import kagglehub; kagglehub.dataset_download('kyleahmurphy/uk-
 
 Opis zbioru i lista urządzeń w każdym domu: `data/raw/REFIT_Readme.txt`.
 
+Obróbka surowych CSV do Parquet (wynik w `data/processed/<hash>/`; gotowe domy są pomijane):
+
+```bash
+uv run python scripts/preprocess.py            # --help pokazuje pozostałe opcje
+```
+
 ## Typowe komendy
 
 ```bash

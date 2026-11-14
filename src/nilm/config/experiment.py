@@ -1,17 +1,17 @@
-"""Config eksperymentu: dane, model, trening i W&B; pliki YAML w configs/."""
+"""Config eksperymentu: obróbka danych, dane, model, trening i W&B; pliki YAML w configs/."""
 
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
 
 from nilm.config.loading import read_yaml, update_dataclass
+from nilm.config.preprocess import PreprocessConfig
 
 WandbMode = Literal["online", "offline", "disabled"]
 
 
 @dataclass
 class DataConfig:
-    dataset_dir: str = "data"
     window_size: int = 100
     appliances: list[str] = field(default_factory=list)
     train_houses: list[str] = field(default_factory=list)
@@ -49,6 +49,7 @@ class WandbConfig:
 @dataclass
 class ExperimentConfig:
     name: str | None = None
+    preprocess: PreprocessConfig = field(default_factory=PreprocessConfig)
     data: DataConfig = field(default_factory=DataConfig)
     model: ModelConfig = field(default_factory=ModelConfig)
     train: TrainConfig = field(default_factory=TrainConfig)
