@@ -18,10 +18,10 @@ POWER_COLS = ["Aggregate", *APPLIANCE_COLS]
 SEGMENT_COL = "segment"
 
 
-def download_refit(output_dir: str | Path = "data/raw") -> Path:
+def download_refit(output_dir: str | Path = "data/raw", force: bool = False) -> Path:
     """Pobiera surowe CSV zbioru REFIT z Kaggle do output_dir i zwraca ścieżkę do danych."""
 
-    return Path(kagglehub.dataset_download(KAGGLE_DATASET, output_dir=str(output_dir)))
+    return Path(kagglehub.dataset_download(KAGGLE_DATASET, output_dir=str(output_dir), force_download=force))
 
 
 def read_house_csv(path: str | Path) -> pd.DataFrame:

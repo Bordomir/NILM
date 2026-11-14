@@ -4,7 +4,18 @@ Ten dokument pokazuje krok po kroku, jak pracujemy nad projektem: od włączenia
 
 Nie musisz znać wszystkiego na pamięć. Na końcu jest **ściąga**, wystarczy do niej zaglądać.
 
-Jeśli pracujesz z nami pierwszy raz, najpierw zrób kroki z sekcji „Zanim zaczniesz” w [wandb.md](wandb.md).
+---
+
+## Zanim zaczniesz (robisz to raz)
+
+1. Załóż dostęp do W&B: kroki z sekcji „Zanim zaczniesz” w [wandb.md](wandb.md).
+2. Pobierz i przygotuj dane:
+   ```bash
+   uv run python scripts/download_data.py   # ok. 6,3 GB, chwilę potrwa
+   uv run python scripts/preprocess.py      # ok. pół minuty
+   ```
+
+Dane trafiają do folderu `data/`. Nie ma go w gicie, więc każdy ma na swoim komputerze własną kopię.
 
 ---
 
@@ -16,10 +27,12 @@ Zanim cokolwiek zmienisz, pobierz to, co zrobili inni:
 git checkout main
 git pull
 uv sync
+uv run python scripts/preprocess.py
 ```
 
 - `git pull` pobiera najnowszy kod.
 - `uv sync` doinstalowuje biblioteki, jeśli ktoś dodał nowe.
+- `preprocess.py` przelicza dane tylko wtedy, gdy ktoś zmienił ich obróbkę. W przeciwnym razie kończy się od razu.
 
 **Dlaczego?** Jeśli zaczniesz pracę na starym kodzie, później trudno będzie połączyć Twoje zmiany ze zmianami innych.
 
@@ -175,7 +188,7 @@ Masz ciekawy wynik albo coś zaskakującego? Opisz to w **Report** na W&B. To do
 
 ```bash
 # 1. Zaktualizuj
-git checkout main && git pull && uv sync
+git checkout main && git pull && uv sync && uv run python scripts/preprocess.py
 
 # 2. Nowa gałąź
 git checkout -b <nazwa-zadania>

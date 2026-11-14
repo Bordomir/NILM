@@ -15,7 +15,7 @@ uv sync                 # tworzy .venv i instaluje zależności (w tym dev)
 Zbiór REFIT z Kaggle (`kyleahmurphy/uk-electrical-load`, ok. 6,3 GB) trzymamy w `data/raw/`, poza gitem:
 
 ```bash
-uv run python -c "import kagglehub; kagglehub.dataset_download('kyleahmurphy/uk-electrical-load', output_dir='data/raw')"
+uv run python scripts/download_data.py         # pomija pobieranie, jeśli dane już są
 ```
 
 Opis zbioru i lista urządzeń w każdym domu: `data/raw/REFIT_Readme.txt`.
