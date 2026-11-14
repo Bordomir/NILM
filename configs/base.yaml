@@ -1,0 +1,23 @@
+# Bazowy config. Nowy eksperyment = kopia tego pliku ze zmienionymi wartościami.
+# Pominięte klucze biorą wartości domyślne z src/nilm/config.py.
+name: baseline
+
+data:
+  window_size: 100
+  appliances: [kettle, microwave, fridge_freezer]
+  # TODO: ustalić wspólny podział domów w zespole
+  train_houses: [House_2]
+  val_houses: []
+  test_houses: [House_12]
+
+model:
+  name: cnn1d
+
+train:
+  seed: 42
+  epochs: 10
+  batch_size: 256
+  lr: 0.001
+
+wandb:
+  tags: [baseline]

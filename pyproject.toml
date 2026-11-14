@@ -1,0 +1,37 @@
+[project]
+name = "nilm"
+version = "0.1.0"
+description = "Non-Intrusive Load Monitoring (NILM) — deep learning na zbiorze REFIT"
+authors = [
+    { name = "Adam", email = "szulczynskiadam31@gmail.com" }
+]
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "kagglehub>=1.0.3",
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.4",
+    "pandas>=3.1.1",
+    "pyyaml>=6.0.3",
+    "torch>=2.15.0",
+    "wandb>=0.31.0",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.4.0",
+    "ruff>=0.17.5",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
