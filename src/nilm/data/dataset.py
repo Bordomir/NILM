@@ -155,7 +155,7 @@ class NILMWindowDataset(Dataset):
 if __name__ == "__main__":
     # Krok 1: Pobranie zbioru z Kaggle
     print("1. Pobieranie zbioru danych z Kaggle...")
-    dataset_path = download_kaggle_dataset("data")
+    dataset_path = download_kaggle_dataset("data/raw")
     print(f"Ścieżka do pobranych danych: {dataset_path}")
     
     # Krok 2-5: Iteracja, wczytanie, czyszczenie i mapowanie kolumn
