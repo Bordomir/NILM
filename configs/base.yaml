@@ -1,5 +1,5 @@
 # Bazowy config. Nowy eksperyment = kopia tego pliku ze zmienionymi wartościami.
-# Pominięte klucze biorą wartości domyślne z src/nilm/config.py.
+# Pominięte klucze biorą wartości domyślne z src/nilm/config/.
 name: baseline
 
 data:

@@ -5,6 +5,7 @@ Jedyny punkt startu runów W&B w projekcie. Nie wywołujemy wandb.init bezpośre
 
 import os
 import subprocess
+from dataclasses import asdict
 from typing import cast, get_args
 
 import wandb
@@ -49,6 +50,6 @@ def init_run(cfg: ExperimentConfig, job_type: str):
         job_type=job_type,
         tags=w.tags,
         notes=w.notes,
-        config={**cfg.to_dict(), "git_dirty": git_dirty},
+        config={**asdict(cfg), "git_dirty": git_dirty},
         mode=mode,
     )
