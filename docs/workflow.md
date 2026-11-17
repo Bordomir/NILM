@@ -77,13 +77,11 @@ wandb:
   debug: true
 ```
 
-Ustaw też mało epok, np. `epochs: 1`, i uruchom trening:
+Ustaw też mało epok, np. `epochs: 1`, i przerzedź okna, np. `stride: 200` i `eval_stride: 100` w sekcji `data`. Run potrwa wtedy minutę, a nie godzinę. Potem uruchom trening:
 
 ```bash
 uv run python scripts/train.py configs/seq2point_kettle.yaml
 ```
-
-> Skrypt `scripts/train.py` jest jeszcze w przygotowaniu. Gdy powstanie, będzie się uruchamiał właśnie tak.
 
 Wynik trafi do projektu **`nilm-dev`** na W&B, czyli do „brudnopisu”.
 

@@ -1,0 +1,31 @@
+# Bazowy config. Nowy eksperyment = kopia tego pliku ze zmienionymi wartościami.
+# Pominięte klucze biorą wartości domyślne z src/nilm/config/.
+name: baseline
+
+# Obróbka danych: zmiana tej sekcji = inne przetworzone dane (nowy hash w data/processed/)
+preprocess:
+  max_gap_s: 60
+
+data:
+  window_size: 100
+  appliances: [kettle, microwave, fridge_freezer]
+
+  # Domy z panelami słonecznymi (House_11, House_21) na razie pomijamy.
+  train_houses: [House_3, House_4, House_9, House_12, House_15, House_17, House_19]
+  val_houses: [House_5]
+  test_houses: [House_2]
+
+model:
+  name: cnn1d
+  # Hiperparametry modelu (argumenty konstruktora), np. {hidden: 64}
+  params: {}
+
+train:
+  seed: 42
+  epochs: 1
+  batch_size: 256
+  lr: 0.001
+
+wandb:
+  tags: [baseline]
+  debug: true

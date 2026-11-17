@@ -2,17 +2,25 @@
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 from nilm.config.loading import read_yaml, update_dataclass
 from nilm.config.preprocess import PreprocessConfig
 
 WandbMode = Literal["online", "offline", "disabled"]
+# Która próbka okna jest celem: ostatnia (model działa w czasie rzeczywistym)
+# albo środkowa (seq2point; model widzi też to, co było po niej)
+TargetPosition = Literal["last", "middle"]
 
 
 @dataclass
 class DataConfig:
     window_size: int = 100
+    target_position: TargetPosition = "last"
+    # Bierzemy co k-te okno: stride dla treningu, eval_stride dla walidacji i testu.
+    # Końcowe wyniki testowe liczymy z eval_stride = 1.
+    stride: int = 1
+    eval_stride: int = 1
     appliances: list[str] = field(default_factory=list)
     train_houses: list[str] = field(default_factory=list)
     val_houses: list[str] = field(default_factory=list)
@@ -21,7 +29,10 @@ class DataConfig:
 
 @dataclass
 class ModelConfig:
+    # Nazwa z MODELS w src/nilm/models/__init__.py
     name: str = "cnn1d"
+    # Hiperparametry przekazywane do konstruktora modelu, np. {"hidden": 64}
+    params: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -30,6 +41,10 @@ class TrainConfig:
     epochs: int = 10
     batch_size: int = 256
     lr: float = 1e-3
+    # Procesy wczytujące dane równolegle z treningiem; 0 = w głównym procesie (łatwiejsze debugowanie)
+    num_workers: int = 4
+    # Co ile kroków logujemy train/loss do W&B
+    log_every_steps: int = 100
 
 
 @dataclass

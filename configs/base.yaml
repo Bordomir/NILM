@@ -17,6 +17,8 @@ data:
 
 model:
   name: cnn1d
+  # Hiperparametry modelu (argumenty konstruktora), np. {hidden: 64}
+  params: {}
 
 train:
   seed: 42

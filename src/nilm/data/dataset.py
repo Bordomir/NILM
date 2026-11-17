@@ -7,13 +7,14 @@ Jedyne wejście dla treningu to build_datasets. Okna są w windows.py, normaliza
 from dataclasses import dataclass
 from itertools import combinations
 from pathlib import Path
+from typing import get_args
 
 import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
 from torch.utils.data import ConcatDataset
 
-from nilm.config import DataConfig
+from nilm.config import DataConfig, TargetPosition
 from nilm.data.normalization import Normalizer
 from nilm.data.preprocessing.io import SEGMENT_COL, read_parquet
 from nilm.data.preprocessing.metadata import APPLIANCES, HouseMeta, load_houses
@@ -77,6 +78,14 @@ def validate_split(cfg: DataConfig, houses: dict[str, HouseMeta]) -> None:
     if not cfg.train_houses:
         problems.append("lista train_houses jest pusta")
 
+    # YAML przyjmie dowolny tekst i liczbę, więc wartości sprawdzamy sami
+    if cfg.target_position not in get_args(TargetPosition):
+        problems.append(f"target_position '{cfg.target_position}', dozwolone: {get_args(TargetPosition)}")
+    for name in ("window_size", "stride", "eval_stride"):
+        value = getattr(cfg, name)
+        if not isinstance(value, int) or value < 1:
+            problems.append(f"{name} musi być liczbą całkowitą >= 1, podano {value!r}")
+
     splits = {"train": cfg.train_houses, "val": cfg.val_houses, "test": cfg.test_houses}
 
     # Ten sam dom w dwóch zbiorach = wyciek danych testowych do treningu
@@ -126,7 +135,7 @@ def load_house_arrays(data_dir: Path, house: HouseMeta, appliances: list[str]) -
     return HouseArrays(house.name, df["Aggregate"].to_numpy(), targets, segments)
 
 
-def make_dataset(houses: list[HouseArrays], normalizer: Normalizer, window_size: int) -> ConcatDataset:
+def make_dataset(houses: list[HouseArrays], normalizer: Normalizer, cfg: DataConfig, stride: int) -> ConcatDataset:
     """Łączy okna z kilku domów w jeden dataset; dane są normalizowane."""
     datasets = []
     for house in houses:
@@ -134,7 +143,9 @@ def make_dataset(houses: list[HouseArrays], normalizer: Normalizer, window_size:
             aggregate=normalizer.normalize_aggregate(house.aggregate),
             targets=normalizer.normalize_targets(house.targets),
             segments=house.segments,
-            window_size=window_size,
+            window_size=cfg.window_size,
+            target_position=cfg.target_position,
+            stride=stride,
         )
         datasets.append(dataset)
     return ConcatDataset(datasets)
@@ -172,8 +183,8 @@ def build_datasets(cfg: DataConfig, data_dir: str | Path) -> NILMDatasets:
     )
 
     # 2. Datasety; val i test normalizujemy statystykami z treningu
-    train = make_dataset(train_houses, normalizer, cfg.window_size)
-    val = make_dataset(load(cfg.val_houses), normalizer, cfg.window_size) if cfg.val_houses else None
-    test = make_dataset(load(cfg.test_houses), normalizer, cfg.window_size) if cfg.test_houses else None
+    train = make_dataset(train_houses, normalizer, cfg, cfg.stride)
+    val = make_dataset(load(cfg.val_houses), normalizer, cfg, cfg.eval_stride) if cfg.val_houses else None
+    test = make_dataset(load(cfg.test_houses), normalizer, cfg, cfg.eval_stride) if cfg.test_houses else None
 
     return NILMDatasets(train=train, val=val, test=test, normalizer=normalizer)
