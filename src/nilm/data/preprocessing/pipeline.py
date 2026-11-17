@@ -14,10 +14,12 @@ import pandas as pd
 
 from nilm.config import PreprocessConfig
 from nilm.data.preprocessing.io import POWER_COLS, SEGMENT_COL, read_house_csv, write_json, write_parquet
-from nilm.data.preprocessing.steps import Step
+from nilm.data.preprocessing.steps import Step, split_segments
 
 PIPELINE_VERSION = 1  # podbij przy KAŻDEJ zmianie logiki etapu
-STEPS: list[Step] = []  # na razie pusto
+STEPS: list[Step] = [
+    Step("split_segments", split_segments),
+]
 
 HASH_LENGTH = 10
 
@@ -128,6 +130,10 @@ def _check_contract(df: pd.DataFrame, after: str) -> None:
         problems.append(f"brakujące kolumny {sorted(expected - columns)}, nadmiarowe {sorted(columns - expected)}")
     elif df["Aggregate"].isna().any():
         problems.append("NaN w Aggregate")
+
+    # Dataset sprawdza tylko początek i koniec okna, więc numery segmentów muszą rosnąć
+    if SEGMENT_COL in df and not df[SEGMENT_COL].is_monotonic_increasing:
+        problems.append(f"kolumna {SEGMENT_COL} nie jest rosnąca")
 
     if problems:
         raise ValueError(f"Kontrakt danych złamany po '{after}': " + "; ".join(problems))

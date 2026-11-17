@@ -63,7 +63,11 @@ def write_json(data: Any, path: str | Path) -> None:
     tmp_path.replace(path)
 
 
-def read_parquet(path: str | Path) -> pd.DataFrame:
-    """Wczytuje DataFrame z pliku Parquet; indeks czasu i typy kolumn są odtwarzane z pliku."""
+def read_parquet(path: str | Path, columns: list[str] | None = None) -> pd.DataFrame:
+    """
+    Wczytuje DataFrame z pliku Parquet; indeks czasu i typy kolumn są odtwarzane z pliku.
 
-    return pd.read_parquet(path)
+    columns: wczytaj tylko te kolumny (indeks zawsze)
+    """
+
+    return pd.read_parquet(path, columns=columns)

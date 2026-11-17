@@ -1,18 +1,23 @@
 """
-Warstwa 2: z danych po obróbce (warstwa 1) budujemy okna czasowe dla modelu.
+Z danych po obróbce (steps w pipeline) budujemy datasety dla treningu.
 
-Wejście to ramka jednego domu w formacie warstwy 1: indeks czasu, kolumny Aggregate
-i Appliance1..9 (opcjonalnie kolumna "segment" z numerem ciągłego fragmentu).
-Kanały zamieniamy na urządzenia dopiero tutaj, na podstawie houses.yaml.
+Jedyne wejście dla treningu to build_datasets. Okna są w windows.py, normalizacja w normalization.py.
 """
+
+from dataclasses import dataclass
+from itertools import combinations
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import torch
-from torch.utils.data import Dataset
+import pyarrow.parquet as pq
+from torch.utils.data import ConcatDataset
 
-from nilm.data.preprocessing.io import SEGMENT_COL
-from nilm.data.preprocessing.metadata import HouseMeta
+from nilm.config import DataConfig
+from nilm.data.normalization import Normalizer
+from nilm.data.preprocessing.io import SEGMENT_COL, read_parquet
+from nilm.data.preprocessing.metadata import APPLIANCES, HouseMeta, load_houses
+from nilm.data.windows import NILMWindowDataset
 
 
 def appliance_target(df: pd.DataFrame, house: HouseMeta, appliance: str) -> pd.Series:
@@ -45,53 +50,130 @@ def appliance_target(df: pd.DataFrame, house: HouseMeta, appliance: str) -> pd.S
     return pd.concat(columns, axis=1).sum(axis=1, skipna=False).rename(appliance)
 
 
-class NILMWindowDataset(Dataset):
+@dataclass
+class HouseArrays:
+    """Dane jednego domu jako tablice numpy, przed normalizacją."""
+
+    name: str
+    aggregate: np.ndarray  # (N,) pobór całego domu w W
+    targets: np.ndarray  # (N, liczba_urządzeń) pobór urządzeń w W; NaN = brak wiarygodnego celu
+    segments: np.ndarray  # (N,) numer ciągłego fragmentu danych
+
+
+def validate_split(cfg: DataConfig, houses: dict[str, HouseMeta]) -> None:
     """
-    Okna stałej długości z sygnału Aggregate i pobór urządzeń w ostatniej próbce okna.
-
-    Okna nie są tworzone z góry (to byłyby gigabajty na dom), tylko wycinane w __getitem__.
-    Okno nigdy nie przechodzi przez granicę segmentu (dziurę w danych),
-    a próbki z celem NaN są pomijane.
+    Sprawdza config danych, zanim zaczniemy wczytywać gigabajty.
+    Zbiera wszystkie problemy naraz, żeby nie poprawiać ich po jednym.
     """
+    problems = []
 
-    def __init__(self, aggregate: np.ndarray, targets: np.ndarray, segments: np.ndarray, window_size: int):
-        # aggregate: (N,), targets: (N, liczba_urządzeń), segments: (N,) - wszystko w kolejności czasu
-        if np.isnan(aggregate).any():
-            raise ValueError("Aggregate zawiera NaN - warstwa 1 powinna je usunąć")
+    if not cfg.appliances:
+        problems.append("lista appliances jest pusta")
+    unknown = sorted(set(cfg.appliances) - APPLIANCES)
+    if unknown:
+        problems.append(f"nieznane urządzenia {unknown} (dozwolone: APPLIANCES w metadata.py)")
+    known_appliances = [a for a in cfg.appliances if a in APPLIANCES]
 
-        self.window_size = window_size
-        self.aggregate = torch.from_numpy(aggregate.astype(np.float32))
-        self.targets = torch.from_numpy(targets.astype(np.float32))
-        self.ends = torch.from_numpy(self._valid_window_ends(targets, segments, window_size))
+    if not cfg.train_houses:
+        problems.append("lista train_houses jest pusta")
 
-    @staticmethod
-    def _valid_window_ends(targets: np.ndarray, segments: np.ndarray, window_size: int) -> np.ndarray:
-        ends = np.arange(window_size - 1, len(segments))
-        # Segmenty są ciągłe i rosnące, więc ten sam numer na początku i końcu okna
-        # oznacza, że całe okno leży w jednym segmencie
-        same_segment = segments[ends - window_size + 1] == segments[ends]
-        has_target = ~np.isnan(targets[ends]).any(axis=1)
-        return ends[same_segment & has_target]
+    splits = {"train": cfg.train_houses, "val": cfg.val_houses, "test": cfg.test_houses}
 
-    def __len__(self) -> int:
-        return len(self.ends)
+    # Ten sam dom w dwóch zbiorach = wyciek danych testowych do treningu
+    for (name_a, houses_a), (name_b, houses_b) in combinations(splits.items(), 2):
+        common = sorted(set(houses_a) & set(houses_b))
+        if common:
+            problems.append(f"domy {common} są jednocześnie w {name_a} i {name_b}")
 
-    def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
-        end = int(self.ends[idx])
-        # Format wejściowy dla modeli w PyTorch: (Channels=1, Length)
-        x = self.aggregate[end - self.window_size + 1 : end + 1].unsqueeze(0)
-        return x, self.targets[end]
+    for split_name, split_houses in splits.items():
+        for house_name in split_houses:
+            if house_name not in houses:
+                problems.append(f"{split_name}: dom {house_name} nie istnieje w houses.yaml")
+                continue
+            missing = [a for a in known_appliances if not houses[house_name].channels_for(a)]
+            if missing:
+                problems.append(f"{split_name}: {house_name} nie ma urządzeń {missing}")
+
+    if problems:
+        raise ValueError("Błędny config danych:\n- " + "\n- ".join(problems))
 
 
-def build_house_dataset(
-    df: pd.DataFrame, house: HouseMeta, appliances: list[str], window_size: int
-) -> NILMWindowDataset:
-    """Dataset jednego domu; dom musi mieć wszystkie podane urządzenia."""
-    missing = [a for a in appliances if not house.channels_for(a)]
-    if missing:
-        raise ValueError(f"{house.name}: brak urządzeń {missing}")
+def load_house_arrays(data_dir: Path, house: HouseMeta, appliances: list[str]) -> HouseArrays:
+    """Wczytuje dom z parquetu i zamienia kanały na urządzenia."""
+    path = data_dir / f"{house.name}.parquet"
+    if not path.exists():
+        raise FileNotFoundError(f"Brak {path} - uruchom scripts/preprocess.py")
+
+    # Wczytujemy tylko potrzebne kanały: 9 domów w całości nie zmieściłoby się wygodnie w RAM
+    columns = ["Aggregate"]
+    for appliance in appliances:
+        for channel in house.channels_for(appliance):
+            if channel.column not in columns:
+                columns.append(channel.column)
+    has_segments = SEGMENT_COL in pq.read_schema(path).names
+    if has_segments:
+        columns.append(SEGMENT_COL)
+
+    df = read_parquet(path, columns=columns)
 
     targets = np.column_stack([appliance_target(df, house, a).to_numpy() for a in appliances])
-    # Dopóki warstwa 1 nie dzieli danych na segmenty, cały dom traktujemy jako jeden segment
-    segments = df[SEGMENT_COL].to_numpy() if SEGMENT_COL in df else np.zeros(len(df), dtype=np.int64)
-    return NILMWindowDataset(df["Aggregate"].to_numpy(), targets, segments, window_size)
+    if has_segments:
+        segments = df[SEGMENT_COL].to_numpy()
+    else:
+        # Dopóki warstwa 1 nie dzieli danych na segmenty, cały dom to jeden segment
+        segments = np.zeros(len(df), dtype=np.int64)
+
+    return HouseArrays(house.name, df["Aggregate"].to_numpy(), targets, segments)
+
+
+def make_dataset(houses: list[HouseArrays], normalizer: Normalizer, window_size: int) -> ConcatDataset:
+    """Łączy okna z kilku domów w jeden dataset; dane są normalizowane."""
+    datasets = []
+    for house in houses:
+        dataset = NILMWindowDataset(
+            aggregate=normalizer.normalize_aggregate(house.aggregate),
+            targets=normalizer.normalize_targets(house.targets),
+            segments=house.segments,
+            window_size=window_size,
+        )
+        datasets.append(dataset)
+    return ConcatDataset(datasets)
+
+
+@dataclass
+class NILMDatasets:
+    """Wynik build_datasets. val/test są None, gdy w configu nie podano domów."""
+
+    train: ConcatDataset
+    val: ConcatDataset | None
+    test: ConcatDataset | None
+    normalizer: Normalizer
+
+
+def build_datasets(cfg: DataConfig, data_dir: str | Path) -> NILMDatasets:
+    """
+    Jedyny punkt wejścia do danych dla treningu.
+
+    data_dir to katalog data/processed/<hash>/ zwrócony przez run_pipeline.
+    """
+    houses = load_houses()
+    validate_split(cfg, houses)
+    data_dir = Path(data_dir)
+
+    def load(house_names: list[str]) -> list[HouseArrays]:
+        return [load_house_arrays(data_dir, houses[name], cfg.appliances) for name in house_names]
+
+    # 1. Statystyki normalizacji tylko z domów treningowych
+    train_houses = load(cfg.train_houses)
+    normalizer = Normalizer(
+        aggregates=[h.aggregate for h in train_houses],
+        targets=[h.targets for h in train_houses],
+        appliances=cfg.appliances,
+    )
+
+    # 2. Datasety; val i test normalizujemy statystykami z treningu
+    train = make_dataset(train_houses, normalizer, cfg.window_size)
+    val = make_dataset(load(cfg.val_houses), normalizer, cfg.window_size) if cfg.val_houses else None
+    test = make_dataset(load(cfg.test_houses), normalizer, cfg.window_size) if cfg.test_houses else None
+
+    return NILMDatasets(train=train, val=val, test=test, normalizer=normalizer)

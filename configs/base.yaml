@@ -3,15 +3,17 @@
 name: baseline
 
 # Obróbka danych: zmiana tej sekcji = inne przetworzone dane (nowy hash w data/processed/)
-preprocess: {}
+preprocess:
+  max_gap_s: 60
 
 data:
   window_size: 100
   appliances: [kettle, microwave, fridge_freezer]
-  # TODO: ustalić wspólny podział domów w zespole
-  train_houses: [House_2]
-  val_houses: []
-  test_houses: [House_12]
+
+  # Domy z panelami słonecznymi (House_11, House_21) na razie pomijamy.
+  train_houses: [House_3, House_4, House_9, House_12, House_15, House_17, House_19]
+  val_houses: [House_5]
+  test_houses: [House_2]
 
 model:
   name: cnn1d
